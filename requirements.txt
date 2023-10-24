@@ -1,0 +1,11 @@
+langchain
+torch
+transformers
+huggingface_hub
+faiss-cpu
+pypdf
+sentence-transformers
+fastapi
+uvicorn
+python-multipart
+python-dotenv

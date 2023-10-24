@@ -1,0 +1,5 @@
+__pycache__
+all-MiniLM-L6-v2
+faiss_index
+venv
+.env
