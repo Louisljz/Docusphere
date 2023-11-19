@@ -1,6 +1,7 @@
 streamlit
 langchain
 openai==0.28.1
+assemblyai
 faiss-cpu
 html2text
 beautifulsoup4

@@ -2,7 +2,8 @@ import streamlit as st
 import os
 
 from langchain.document_loaders import (
-    AsyncHtmlLoader, PyPDFLoader, Docx2txtLoader, TextLoader
+    AsyncHtmlLoader, PyPDFLoader, Docx2txtLoader, TextLoader, 
+    UnstructuredPowerPointLoader, UnstructuredExcelLoader, 
 )
 from langchain.document_transformers import Html2TextTransformer
 
@@ -12,6 +13,9 @@ from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLo
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+
+if "documents" not in st.session_state:
+    st.session_state.documents = []
 
 st.set_page_config('Ingest Documents', '📃')
 st.title('Ingest Documents 📃')
@@ -54,6 +58,10 @@ elif media == 'Documents':
                 loader = PyPDFLoader(filepath)
             elif file.name.endswith('.docx') or file.name.endswith('.doc'):
                 loader = Docx2txtLoader(filepath)
+            elif file.name.endswith('.ppt') or file.name.endswith('.pptx'):
+                loader = UnstructuredPowerPointLoader(filepath)
+            elif file.name.endswith('.xls') or file.name.endswith('.xlsx'):
+                loader = UnstructuredExcelLoader(filepath)
             elif file.name.endswith('.txt'):
                 loader = TextLoader(filepath)
             
@@ -72,4 +80,4 @@ else:
         docs = text_splitter.split_documents(transcript)
         st.session_state.documents.extend(docs)
         clear_temp()
-        st.info('YT audio transcripted!')
+        st.info('YT audio transcript saved!')
