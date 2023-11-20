@@ -30,7 +30,7 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=500, chunk_overlap=80
 )
 
-media = st.selectbox('Choose media type:', ['Websites', 'Documents', 'YT Videos'])
+media = st.selectbox('Choose media type:', ['Documents', 'Websites', 'YT Videos'])
 
 if media == 'Websites':
     web_url = st.text_input('Link to webpage:')
@@ -44,8 +44,8 @@ if media == 'Websites':
         st.info('Web page scraped!')
 
 elif media == 'Documents':
-    files = st.file_uploader('Upload documents:', 
-                ['pdf', 'doc', 'docx', 'txt'], accept_multiple_files=True)
+    files = st.file_uploader('Upload documents:', accept_multiple_files=True,
+            type=['pdf', 'txt', 'doc', 'docx', 'ppt',  'pptx', 'xls', 'xlsx'])
     if files:
         documents = []
         for file in files:
@@ -56,14 +56,14 @@ elif media == 'Documents':
             
             if file.name.endswith(".pdf"):
                 loader = PyPDFLoader(filepath)
-            elif file.name.endswith('.docx') or file.name.endswith('.doc'):
+            elif file.name.endswith('.txt'):
+                loader = TextLoader(filepath)
+            elif file.name.endswith('.doc') or file.name.endswith('.docx'):
                 loader = Docx2txtLoader(filepath)
             elif file.name.endswith('.ppt') or file.name.endswith('.pptx'):
                 loader = UnstructuredPowerPointLoader(filepath)
             elif file.name.endswith('.xls') or file.name.endswith('.xlsx'):
                 loader = UnstructuredExcelLoader(filepath)
-            elif file.name.endswith('.txt'):
-                loader = TextLoader(filepath)
             
             documents.extend(loader.load())
 
