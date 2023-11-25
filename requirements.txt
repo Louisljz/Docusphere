@@ -1,7 +1,9 @@
 streamlit
 langchain
 openai==0.28.1
+assemblyai
 faiss-cpu
+pinecone-client
 html2text
 beautifulsoup4
 pypdf

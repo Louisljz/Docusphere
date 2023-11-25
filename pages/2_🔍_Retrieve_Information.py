@@ -3,16 +3,18 @@ import openai
 
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
+from langchain.vectorstores import Pinecone
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationTokenBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 
-st.set_page_config('Retrieve Information', '🔍')
-st.title('Retrieve Information 🔍')
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+st.set_page_config('Retrieve Information', '🔍')
+st.title('Retrieve Information 🔍')
 
 @st.cache_resource
 def load_models():
@@ -25,10 +27,17 @@ def load_models():
 embeddings, llm = load_models()
 
 if 'documents' in st.session_state and len(st.session_state.documents) > 0:
-    with st.spinner('Pushing documents to DB'):
-        vector_store = FAISS.from_documents(
-            st.session_state.documents, embeddings, 
-        )
+    with st.spinner('Processing documents..'):
+        vs_data = st.session_state.vector_store
+        if vs_data['type'] == 'pinecone':
+            vector_store = Pinecone.from_documents(
+                st.session_state.documents, embeddings, index_name=vs_data['name']
+            )
+        elif vs_data['type'] == 'faiss':
+            vector_store = FAISS.from_documents(
+                st.session_state.documents, embeddings, 
+            )
+
     memory = ConversationTokenBufferMemory(
         max_token_limit=300, return_messages=True, 
         llm=llm, memory_key='chat_history'
@@ -54,4 +63,4 @@ if 'documents' in st.session_state and len(st.session_state.documents) > 0:
         st.session_state.messages.append({"role": "assistant", "content": response})
 
 else:
-    st.info('Ingest at least one document first.')
+    st.warning('Ingest at least one document first.')

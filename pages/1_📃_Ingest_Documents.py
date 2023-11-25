@@ -6,11 +6,7 @@ from langchain.document_loaders import (
     UnstructuredPowerPointLoader, UnstructuredExcelLoader, 
 )
 from langchain.document_transformers import Html2TextTransformer
-
-from langchain.document_loaders.generic import GenericLoader
-from langchain.document_loaders.parsers import OpenAIWhisperParser
-from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
-
+from langchain.document_loaders import AssemblyAIAudioTranscriptLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -30,7 +26,7 @@ text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=500, chunk_overlap=80
 )
 
-media = st.selectbox('Choose media type:', ['Documents', 'Websites', 'YT Videos'])
+media = st.selectbox('Choose media type:', ['Documents', 'Video/Audio', 'Websites'])
 
 if media == 'Websites':
     web_url = st.text_input('Link to webpage:')
@@ -73,11 +69,16 @@ elif media == 'Documents':
         st.info('Document content extracted!')
 
 else:
-    yt_url = st.text_input('Youtube Video URL:')
-    if yt_url:
-        loader = GenericLoader(YoutubeAudioLoader([yt_url], 'temp'), OpenAIWhisperParser())
+    file = st.file_uploader('Upload documents:', type=['mp3', 'mp4'])
+    if file:
+        filepath = os.path.join('temp', file.name)
+        with open(filepath, 'wb') as f:
+            f.write(file.read())
+        
+        loader = AssemblyAIAudioTranscriptLoader(filepath)
         transcript = loader.load()
+
         docs = text_splitter.split_documents(transcript)
         st.session_state.documents.extend(docs)
         clear_temp()
-        st.info('YT audio transcript saved!')
+        st.info('Video/Audio Transcribed!')
