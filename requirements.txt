@@ -1,13 +1,14 @@
 streamlit
 langchain
 openai==0.28.1
-assemblyai
 faiss-cpu
 html2text
 beautifulsoup4
 pypdf
 docx2txt
 unstructured
+openpyxl
+python-pptx
 yt_dlp
 pydub
 sentence-transformers
