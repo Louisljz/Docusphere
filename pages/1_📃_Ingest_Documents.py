@@ -10,16 +10,13 @@ from langchain.document_loaders import AssemblyAIAudioTranscriptLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-if "documents" not in st.session_state:
-    st.session_state.documents = []
-
 st.set_page_config('Ingest Documents', '📃')
 st.title('Ingest Documents 📃')
 
 def clear_temp(folder_path='temp'):
     for file_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file_name)
-        if os.path.isfile(file_path):
+        if not file_name.endswith('.md'):
+            file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
 
 text_splitter = RecursiveCharacterTextSplitter(
@@ -36,7 +33,7 @@ if media == 'Websites':
         html2text = Html2TextTransformer()
         clean_web_content = html2text.transform_documents(raw_web_content)
         docs = text_splitter.split_documents(clean_web_content)
-        st.session_state.documents.extend(docs)
+        st.session_state.vector_store.add_documents(docs)
         st.info('Web page scraped!')
 
 elif media == 'Documents':
@@ -64,7 +61,7 @@ elif media == 'Documents':
             documents.extend(loader.load())
 
         docs = text_splitter.split_documents(documents)
-        st.session_state.documents.extend(docs)
+        st.session_state.vector_store.add_documents(docs)
         clear_temp()
         st.info('Document content extracted!')
 
@@ -79,6 +76,6 @@ else:
         transcript = loader.load()
 
         docs = text_splitter.split_documents(transcript)
-        st.session_state.documents.extend(docs)
+        st.session_state.vector_store.add_documents(docs)
         clear_temp()
         st.info('Video/Audio Transcribed!')
