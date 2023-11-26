@@ -18,8 +18,8 @@ st.title('Ingest Documents 📃')
 
 def clear_temp(folder_path='temp'):
     for file_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file_name)
-        if os.path.isfile(file_path):
+        if not file_name.endswith('.md'):
+            file_path = os.path.join(folder_path, file_name)
             os.remove(file_path)
 
 text_splitter = RecursiveCharacterTextSplitter(
