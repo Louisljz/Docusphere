@@ -17,6 +17,5 @@ index_name = st.text_input('Pinecone Index Name:')
 if api_key and env and index_name:
     pinecone.init(api_key=api_key, environment=env)
     index = pinecone.Index(index_name)
-    if "vector_store" not in st.session_state:
-        st.session_state.vector_store = Pinecone(index, embeddings.embed_query, "text")
+    st.session_state.vector_store = Pinecone(index, embeddings.embed_query, "text")
     st.success('Pinecone DB connected!')
