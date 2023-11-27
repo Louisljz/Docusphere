@@ -4,9 +4,9 @@ import os
 from langchain.document_loaders import (
     AsyncHtmlLoader, PyPDFLoader, Docx2txtLoader, TextLoader, 
     UnstructuredPowerPointLoader, UnstructuredExcelLoader, 
+    AssemblyAIAudioTranscriptLoader
 )
 from langchain.document_transformers import Html2TextTransformer
-from langchain.document_loaders import AssemblyAIAudioTranscriptLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
@@ -66,16 +66,22 @@ elif media == 'Documents':
         st.info('Document content extracted!')
 
 else:
-    file = st.file_uploader('Upload documents:', type=['mp3', 'mp4'])
-    if file:
-        filepath = os.path.join('temp', file.name)
-        with open(filepath, 'wb') as f:
-            f.write(file.read())
-        
-        loader = AssemblyAIAudioTranscriptLoader(filepath)
-        transcript = loader.load()
+    files = st.file_uploader('Upload video/audio:', type=['mp3', 'mp4'], accept_multiple_files=True)
+    if files:
+        transcript_list = []
+        for file in files:
+            filepath = os.path.join('temp', file.name)
+            with open(filepath, 'wb') as f:
+                f.write(file.read())
+            
+            loader = AssemblyAIAudioTranscriptLoader(filepath)
+            transcript = loader.load()
+            transcript_list.extend(transcript)
 
-        docs = text_splitter.split_documents(transcript)
+            with st.expander(file.name):
+                st.write(transcript)
+
+        docs = text_splitter.split_documents(transcript_list)
         st.session_state.vector_store.add_documents(docs)
         clear_temp()
         st.info('Video/Audio Transcribed!')

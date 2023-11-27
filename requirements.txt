@@ -2,7 +2,6 @@ streamlit
 langchain
 openai==0.28.1
 assemblyai
-faiss-cpu
 pinecone-client
 html2text
 beautifulsoup4
@@ -11,7 +10,5 @@ docx2txt
 unstructured
 openpyxl
 python-pptx
-yt_dlp
-pydub
 sentence-transformers
 tiktoken
