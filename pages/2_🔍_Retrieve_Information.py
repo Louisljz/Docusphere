@@ -22,7 +22,7 @@ if 'vector_store' in st.session_state:
     )
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm, st.session_state.vector_store.as_retriever(), 
-        chain_type='stuff', memory=memory, verbose=True
+        chain_type='stuff', memory=memory
     )
 
     for message in st.session_state.messages:
