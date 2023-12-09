@@ -10,7 +10,12 @@ langchain.debug = True
 st.set_page_config('Home', '📖')
 st.title('Docusphere HomePage 📖')
 
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+@st.cache_data
+def load_embeddings():
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    return embeddings
+
+embeddings = load_embeddings()
 
 api_key = st.text_input('Pinecone API Key:')
 env = st.text_input('Pinecone Environment:')
