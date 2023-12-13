@@ -1,5 +1,4 @@
 import streamlit as st
-import openai
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationTokenBufferMemory
@@ -13,11 +12,9 @@ if 'vector_store' in st.session_state:
     if "messages" not in st.session_state:
         st.session_state.messages = []
     
-    openai.api_key = st.secrets['OPENAI_API_KEY']
-    llm = ChatOpenAI(model_name='gpt-3.5-turbo', temperature=0)
-
+    llm = ChatOpenAI()
     memory = ConversationTokenBufferMemory(
-        max_token_limit=300, return_messages=True, 
+        max_token_limit=500, return_messages=True, 
         llm=llm, memory_key='chat_history'
     )
     qa_chain = ConversationalRetrievalChain.from_llm(
@@ -35,10 +32,10 @@ if 'vector_store' in st.session_state:
         st.session_state.messages.append({"role": "user", "content": prompt})
 
         with st.chat_message("assistant"):
-            with st.spinner('Retrieving information..'):
+            with st.spinner('Processing query..'):
                 response = qa_chain.run(prompt)
             st.markdown(response)
         st.session_state.messages.append({"role": "assistant", "content": response})
 
 else:
-    st.warning('Connect your Pinecone DB first! ')
+    st.warning('Connect your Pinecone DB first!')
