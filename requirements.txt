@@ -12,3 +12,4 @@ pydub
 sentence-transformers
 tiktoken
 python-dotenv
+streamlit_extras
