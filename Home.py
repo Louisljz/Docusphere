@@ -1,7 +1,10 @@
 import streamlit as st
-import pinecone
-import langchain
+from streamlit_extras.switch_page_button import switch_page
 
+import os
+import pinecone
+
+import langchain
 from langchain.vectorstores import Pinecone
 from langchain.embeddings import OpenAIEmbeddings
 
@@ -19,3 +22,4 @@ if api_key and env and index_name and st.button('connect'):
     pinecone.init(api_key=api_key, environment=env)
     st.session_state.vector_store = Pinecone.from_existing_index(index_name, OpenAIEmbeddings())
     st.success('Pinecone DB connected!')
+    switch_page('Ingest Documents')
