@@ -1,82 +1,78 @@
 import streamlit as st
+from openai import OpenAI
 import os
 from langchain.document_loaders import (
-    AsyncHtmlLoader, PyPDFLoader, Docx2txtLoader, TextLoader, 
-    UnstructuredPowerPointLoader, UnstructuredExcelLoader, 
+    WebBaseLoader, PyPDFLoader, TextLoader, UnstructuredWordDocumentLoader, 
+    UnstructuredPowerPointLoader, UnstructuredExcelLoader
 )
-from langchain.document_transformers import Html2TextTransformer
-
-from langchain.document_loaders.generic import GenericLoader
-from langchain.document_loaders.parsers import OpenAIWhisperParser
-from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
-
+from langchain.docstore.document import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
-if "documents" not in st.session_state:
-    st.session_state.documents = []
 
 st.set_page_config('Ingest Documents', '📃')
 st.title('Ingest Documents 📃')
 
-def clear_temp(folder_path='temp'):
-    for file_name in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, file_name)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
+def upload_docs(documents):
+    doc_splits = text_splitter.split_documents(documents)
+    st.session_state.vector_store.add_documents(doc_splits)
 
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500, chunk_overlap=80
-)
+if 'vector_store' in st.session_state:
+    client = OpenAI()
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1024, chunk_overlap=100
+    )
 
-media = st.selectbox('Choose media type:', ['Documents', 'Websites', 'YT Videos'])
+    media = st.selectbox('Choose media type:', ['Documents', 'Audio', 'Webpages'])
 
-if media == 'Websites':
-    web_url = st.text_input('Link to webpage:')
-    if web_url:
-        loader = AsyncHtmlLoader(web_url)
-        raw_web_content = loader.load()
-        html2text = Html2TextTransformer()
-        clean_web_content = html2text.transform_documents(raw_web_content)
-        docs = text_splitter.split_documents(clean_web_content)
-        st.session_state.documents.extend(docs)
-        st.info('Web page scraped!')
+    if media == 'Webpages':
+        web_url = st.text_input('Link to webpage:')
+        if web_url:
+            loader = WebBaseLoader(web_url)
+            documents = loader.load()
+            st.info('Web page scraped!')
+            upload_docs(documents)
 
-elif media == 'Documents':
-    files = st.file_uploader('Upload documents:', accept_multiple_files=True,
-            type=['pdf', 'txt', 'doc', 'docx', 'ppt',  'pptx', 'xls', 'xlsx'])
-    if files:
-        documents = []
-        for file in files:
-
-            filepath = os.path.join('temp', file.name)
-            with open(filepath, 'wb') as f:
-                f.write(file.read())
+    elif media == 'Documents':
+        doc_files = st.file_uploader('Upload documents:', accept_multiple_files=True,
+                type=['txt', 'pdf', 'doc', 'docx', 'ppt',  'pptx', 'xls', 'xlsx'])
+        if doc_files:
+            documents = []
+            for file in doc_files:
+                filepath = os.path.join('temp', file.name)
+                with open(filepath, 'wb') as f:
+                    f.write(file.read())
+                
+                if file.name.endswith(".pdf"):
+                    loader = PyPDFLoader(filepath)
+                elif file.name.endswith('.txt'):
+                    loader = TextLoader(filepath)
+                elif file.name.endswith('.doc') or file.name.endswith('.docx'):
+                    loader = UnstructuredWordDocumentLoader(filepath)
+                elif file.name.endswith('.ppt') or file.name.endswith('.pptx'):
+                    loader = UnstructuredPowerPointLoader(filepath)
+                elif file.name.endswith('.xls') or file.name.endswith('.xlsx'):
+                    loader = UnstructuredExcelLoader(filepath)
+                
+                documents.extend(loader.load())
+                os.remove(filepath)
             
-            if file.name.endswith(".pdf"):
-                loader = PyPDFLoader(filepath)
-            elif file.name.endswith('.txt'):
-                loader = TextLoader(filepath)
-            elif file.name.endswith('.doc') or file.name.endswith('.docx'):
-                loader = Docx2txtLoader(filepath)
-            elif file.name.endswith('.ppt') or file.name.endswith('.pptx'):
-                loader = UnstructuredPowerPointLoader(filepath)
-            elif file.name.endswith('.xls') or file.name.endswith('.xlsx'):
-                loader = UnstructuredExcelLoader(filepath)
-            
-            documents.extend(loader.load())
+            st.info('Document content extracted!')
+            upload_docs(documents)
 
-        docs = text_splitter.split_documents(documents)
-        st.session_state.documents.extend(docs)
-        clear_temp()
-        st.info('Document content extracted!')
+    else:
+        audio_file = st.file_uploader('Upload video/audio:', type=['mp3', 'mp4', 'm4a'])
+        if audio_file:
+            transcript = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file
+            )
+
+            with st.expander('transcript'):
+                st.write(transcript.text)
+
+            document = Document(page_content=transcript.text, metadata={'source': audio_file.name})
+            st.info('Video/Audio Transcribed!')
+            upload_docs([document])
 
 else:
-    yt_url = st.text_input('Youtube Video URL:')
-    if yt_url:
-        loader = GenericLoader(YoutubeAudioLoader([yt_url], 'temp'), OpenAIWhisperParser())
-        transcript = loader.load()
-        docs = text_splitter.split_documents(transcript)
-        st.session_state.documents.extend(docs)
-        clear_temp()
-        st.info('YT audio transcript saved!')
+    st.warning('Connect your Pinecone DB first!')

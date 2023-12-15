@@ -1,15 +1,12 @@
 streamlit
-langchain
-openai==0.28.1
-assemblyai
-faiss-cpu
-html2text
-beautifulsoup4
-pypdf
-docx2txt
-yt_dlp
-pydub
-sentence-transformers
-tiktoken
-python-dotenv
 streamlit_extras
+langchain
+openai
+tiktoken
+pinecone-client
+pypdf
+unstructured
+openpyxl # excel
+networkx # excel
+python-docx
+python-pptx
