@@ -33,3 +33,4 @@ elif option == 'Huggingface':
 
 else:
     st.info('Select a model to continue 👆')
+

@@ -78,4 +78,5 @@ if 'vector_store' in st.session_state:
             st.info('Video/Audio Transcribed!')
 
 else:
+
     st.warning('Connect your Pinecone DB first!')
