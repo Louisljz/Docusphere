@@ -29,8 +29,10 @@ if 'vector_store' in st.session_state:
         if web_url:
             loader = WebBaseLoader(web_url)
             documents = loader.load()
-            st.info('Web page scraped!')
+            
             upload_docs(documents)
+            st.info('Web page scraped!')
+
 
     elif media == 'Documents':
         doc_files = st.file_uploader('Upload documents:', accept_multiple_files=True,
@@ -56,8 +58,8 @@ if 'vector_store' in st.session_state:
                 documents.extend(loader.load())
                 os.remove(filepath)
             
-            st.info('Document content extracted!')
             upload_docs(documents)
+            st.info('Document content extracted!')
 
     else:
         audio_file = st.file_uploader('Upload video/audio:', type=['mp3', 'mp4', 'm4a'])
@@ -71,8 +73,9 @@ if 'vector_store' in st.session_state:
                 st.write(transcript.text)
 
             document = Document(page_content=transcript.text, metadata={'source': audio_file.name})
-            st.info('Video/Audio Transcribed!')
+            
             upload_docs([document])
+            st.info('Video/Audio Transcribed!')
 
 else:
     st.warning('Connect your Pinecone DB first!')
