@@ -75,4 +75,5 @@ if 'vector_store' in st.session_state:
             upload_docs([document])
 
 else:
+
     st.warning('Connect your Pinecone DB first!')

@@ -38,4 +38,6 @@ if 'vector_store' in st.session_state:
         st.session_state.messages.append({"role": "assistant", "content": response})
 
 else:
+
     st.warning('Connect your Pinecone DB first!')
+

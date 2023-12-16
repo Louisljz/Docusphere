@@ -15,6 +15,7 @@ st.title('Docusphere')
 st.write('Connect your Pinecone VectorDB with OpenAI Embedding Option.')
 
 api_key = st.text_input('API Key:', type='password')
+
 env = st.text_input('Environment:')
 index_name = st.text_input('Index Name:')
 
